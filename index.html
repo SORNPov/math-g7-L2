@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់គណិតវិទ្យាថ្នាក់ទី៧</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans Khmer', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.8;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .score-board {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        
+        .score-item {
+            text-align: center;
+        }
+        
+        .score-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .quiz-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        .quiz-card.active {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+        
+        .question {
+            font-size: 1.3em;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-family: 'Noto Sans Khmer', sans-serif;
+            transition: border-color 0.3s;
+        }
+        
+        .answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Noto Sans Khmer', sans-serif;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn-check {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-check:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-next {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-next:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .feedback.show {
+            display: block;
+        }
+        
+        .feedback.correct {
+            background: #c6f6d5;
+            color: #22543d;
+            border-left: 4px solid #48bb78;
+        }
+        
+        .feedback.incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+            border-left: 4px solid #f56565;
+        }
+        
+        .solution {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #667eea;
+            display: none;
+            white-space: pre-line;
+        }
+        
+        .solution.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .solution-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .results {
+            display: none;
+            text-align: center;
+        }
+        
+        .results.show {
+            display: block;
+            animation: slideIn 0.5s;
+        }
+        
+        .results h2 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        
+        .final-score {
+            font-size: 4em;
+            color: #48bb78;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Noto Sans Khmer', sans-serif;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .btn-restart:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>តេស្តគណិតវិទ្យាថ្នាក់ទី៧</h1>
+            <p>មេរៀនទី២៖ តួចែក និងពហុគុណ</p>
+        </div>
+        
+        <div class="score-board">
+            <div class="score-item">
+                <div class="score-label">លំហាត់</div>
+                <div class="score-value"><span id="current-question">១</span>/<span id="total-questions"></span></div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">ឆ្លើយត្រូវបាន</div>
+                <div class="score-value" id="score">០</div>
+            </div>
+        </div>
+        
+        <div id="quiz-container"></div>
+        
+        <div class="quiz-card results" id="results">
+            <h2>🎉 រួចរាល់!</h2>
+            <p style="font-size: 1.3em; margin-bottom: 10px;">អ្នកឆ្លើយត្រូវបាន</p>
+            <div class="final-score" id="final-score">០/០</div>
+            <p style="font-size: 1.2em; color: #666;" id="percentage"></p>
+            <button class="btn-restart" onclick="restartQuiz()">ចាប់ផ្តើមឡើងវិញ</button>
+        </div>
+    </div>
+    
+    <script>
+        const quizData = [{"question": "គេឱ្យចំនួនដែលមានលេខ \\(7\\) ខ្ទង់ \\(789783⬜\\) ។\nបំពេញលេខក្នុងប្រអប់ដើម្បីឱ្យបានចំនួនដែលចែកដាច់នឹង \\(2\\) ផង នឹង \\(5\\) ផង។", "answer": "0", "solution": "- មួយចំនួនចែកដាច់នឹង \\(2\\) លុះត្រាតែលេខខាងចុងជាលេខ \\(0,2,4,6\\), ឬ \\(8\\)\n- មួយចំនួនចែកដាច់នឹង \\(5\\) លុះត្រាតែលេខខាងចុងជាលេខ \\(0\\) ឬ \\(5\\)\nហេតុនេះដើម្បីឱ្យចំនួនេះចែកដាច់នឹង \\(2\\) ផងនឹង \\(5\\) ផងលុះត្រាតែលេខក្នុង \\(⬜=0\\)"}, {"question": "រកគ្រប់ផលបូកនៃចំនួនគត់ដែលចែកដាច់នឹង \\(5\\) ដែលនោះចន្លោះពី \\(1\\) ដល់ \\(50\\) ។", "answer": "275", "solution": "- ចំនួនគត់ដែលចែកដាច់នឹង \\(5\\) ចន្លោះពី \\(1\\) ដល់ \\(50\\) គឺ៖ \\(5, 10, 15, 20, 25, 30, 35,40 45, 50\\)\n-  ផលបូក \\(S=5+10+15+20+25+30+35+40+45+50=275\\)\nដូច្នេះ \\(S=275\\)"}, {"question": "ចំនួនមានលេខ \\(5\\) ខ្ទង់ \\(\\overline{22A22}\\) ចែកដាច់នឹង \\(9\\) ។\nកំណត់តម្លៃនៃ \\(A\\) ។", "answer": "1", "solution": "- ចំនួនចែកដាច់នឹង 9 លុះត្រាតែផលបូកលេខតាមខ្ទង់ទាំងអស់ចែកដាច់នឹង 9\n- ផលបូកលេខនៃ \\(\\overline{22A22}\\) គឺ \\(2 + 2 + A + 2 + 2 = 8 + A\\)\n- នោះ \\(8 + A\\) ចែកដាច់នឹង \\(9\\) \n- ដោយ \\(A\\) ជាចំនួនគត់ (0 ដល់ 9) នោះ \\(8 \\le 8 + A \\le 17\\)\n- ចំនួនចែកដាច់នឹង 9 ក្នុងចន្លោះនេះគឺ 9 \n- គេបាន \\(8 + A = 9 \\iff A=1\\)\nដូច្នេះ \\(A=1\\)"}, {"question": "ចំនួនមានលេខ \\(5\\) ខ្ទង់ \\(\\overline{1A34B}\\) ចែកដាច់នឹង \\(9\\) ។\nបើ \\(A+B=k\\) រកផលបូកនៃគ្រប់តម្លៃដែលអាចមាននៃ \\(k\\) ។", "answer": "11", "solution": "- ចំនួនចែកដាច់នឹង 9 លុះត្រាតែផលបូកលេខតាមខ្ទង់ទាំងអស់ចែកដាច់នឹង 9\n- ផលបូកលេខនៃ \\(\\overline{1A34B}\\) គឺ \\(1 + A + 3 + 4 + B = 8 + A + B\\)\n- នោះ \\(8 + A + B\\) ចែកដាច់នឹង 9\n- ដោយ \\(A\\) និង \\(B\\) ជាចំនួនគត់ (0 ដល់ 9) នោះ \\(8 \\le 8 + A + B \\le 26\\)\n- ចំនួនចែកដាច់នឹង 9 ក្នុងចន្លោះនេះគឺ 9 និង 18។  \n- គេបាន \\(8 + A + B = 9 \\iff A + B = 1\\) ឬ \\(8 + A + B = 18 \\iff A + B = 10\\)\n- តម្លៃនៃ \\(k\\) មានពីរគឺ \\(1\\) ឬ \\(10\\)\n- ផលបូកតម្លៃនៃ \\(k\\) គឺ \\( 1+10=11\\)\nដូច្នេះ ផលបូកតម្លៃនៃ \\(k\\) គឺ \\(11\\)"}, {"question": "រកផលបូកនៃគ្រប់ចំនួនគត់ជាពហុគុណនៃ \\(6\\) នៅចន្លោះ \\(20\\) និង \\(40\\) ។", "answer": "90", "solution": "- ពហុគុណនៃ 6 ក្នុងចន្លោះ 20 និង 40 (មិនរាប់បញ្ចូលចំនួនដំបូង និងចំនួនចុងក្រោយ) គឺ \\(24, 30,\\) និង \\(36\\)\n- ផលបូកគឺ \\(24 + 30 + 36 = 90\\)\nដូច្នេះ ផលបូកនេះស្មើនឹង \\(90\\)"}, {"question": "រកផលបូកនៃគ្រប់ចំនួនបឋម \\(p\\) ដែល \\(7 < p\\le 21\\) ។", "answer": "60", "solution": "- ចំនួនបឋមក្នុងចន្លោះនេះគឺ \\(11,13,17,19\\)\n- ផលបូកគឺ \\(11 + 13 + 17 + 19 = 60\\)\nដូច្នេះ ផលបូកគឺ \\(60\\)"}, {"question": "\\(p\\) និង \\(q\\) ជាពីរចំនួនបឋមខុសគ្នាដែល \\(10 < p < q <15\\) ។\nគណនា \\(q^2-p^2\\) ។", "answer": "48", "solution": "- ចំនួនបឋមក្នុងចន្លោះ \\(10 < x < 15\\) គឺ \\(11\\) និង \\(13\\)\n- ដោយ \\( p < q \\) នោះ \\(p = 11\\) និង \\(q = 13\\)\n- គេបាន \\(q^2 - p^2 = 13^2-11^2=169-121 = 48\\)\nដូច្នេះ \\(q^2-p^2=48\\)"}, {"question": "បើ \\(A=\\mathrm{GCD}(10,15)\\) និង \\(B=\\mathrm{GCD}(8,12,16)\\) \nគណនា \\(A+B\\) ។", "answer": "9", "solution": "- រក \\( A = \\mathrm{GCD}(10,15) \\) \n\\[\n\\begin{align*}\n10 & =2\\times 5\\\\\n15 & = 3\\times 5\n\\end{align*}\n\\]\nនោះ \\(\\mathrm{GCD}(10,15)=5\\)\n\n- រក \\( B = \\mathrm{GCD}(8,12,16) \\) \n\\[\n\\begin{align*}\n8 & =2^3\\\\\n12 & = 3\\times 2^2\\\\\n16 & = 2^4\n\\end{align*}\n\\]\nនោះ \\(\\mathrm{GCD}(8,12,16)=2^2=4\\)\n- គេបាន \\( A + B = 5 + 4 = 9 \\)\nដូច្នេះ \\(A+B=9\\)"}, {"question": "គេចែកសៀវភៅ \\(24\\) ក្បាល និងខ្មៅដៃ \\(36\\) ដើមឱ្យសិស្សស្មើៗគ្នា ដោយគ្មានឱ្យសល់សៀវភៅ ឬខ្មៅដៃ។\nគេសម្រេចចិត្តចែកសៀវភៅ និងខ្មៅដៃឱ្យសិស្សបានចំនួនច្រើននាក់បំផុត។\nតើគេអាចចែកសៀវភៅឱ្យសិស្សបានប៉ុន្មាននាក់?", "answer": "12", "solution": "- គេចែកសៀវភៅ ២៤ ក្បាល និងខ្មៅដៃ ៣៦ ដើមឱ្យសិស្សស្មើគ្នា ដោយគ្មានសល់ និងចង់បានចំនួនសិស្សច្រើនបំផុត\n- ចំនួនសិស្ស \\(n\\) នាក់ ត្រូវចែកសៀវភៅទាំងអស់ និងខ្មៅដៃទាំងអស់ស្មើគ្នា មានន័យថា \\(n\\) តួចែករួមនៃ ២៤ និង ៣៦\n- ដើម្បីបាន \\(n\\) ច្រើនបំផុត យក \\(n = \\mathrm{GCD}(24,36)\\)\n\n\n- រក \\(\\mathrm{GCD}(24,36)\\)\n\\[\n\\begin{align*}\n24 &= 2^3 \\times 3 \\\\\n36 &= 2^2 \\times 3^2\n\\end{align*}\n\\]  \nនោះ \\(\\mathrm{GCD}(24,36) = 2^2 \\times 3 = 4 \\times 3 = 12\\)\n\nដូច្នេះ គេអាចចែកឱ្យសិស្សបាន ១២ នាក់ (ម្នាក់ៗទទួលសៀវភៅ ២ ក្បាល និងខ្មៅដៃ ៣ ដើម)។"}, {"question": "ក្នុងសាលាមួយមានសិស្សដែលជាកីឡាករបាល់បោះដែលជាខ្សែប្រយុទ្ធ \\(32\\) នាក់ និងខ្សែការពារចំនួន \\(80\\) នាក់។\nគេចង់បែងចែកក្រុមកីឡាករទាំងនេះទៅជាក្រុមតូចៗដែលមានចំនួនខ្សែប្រយុទ្ធ និងខ្សែការពារស្មើៗគ្នា។\nបើគេចង់បង្កើតក្រុមឱ្យបានតិចបំផុត តើក្នុងមួយក្រុមត្រូវមានខ្សែការពារប៉ុន្មាននាក់?", "answer": "5", "solution": "- គេចង់បែងចែកខ្សែប្រយុទ្ធ ៣២ នាក់ និងខ្សែការពារ ៨០ នាក់ទៅជាក្រុមតូចៗដែលស្មើគ្នា (មានចំនួនខ្សែប្រយុទ្ធ និងខ្សែការពារដូចគ្នាគ្នាក្នុងក្រុមនីមួយៗ) ដោយប្រើកីឡាករទាំងអស់ដោយគ្មានសល់។  \n- ដើម្បីបង្កើតក្រុមបានច្រើនបំផុត (ក្រុមតូចបំផុត) ចំនួនក្រុម \\(k\\) គឺ \\(k = \\mathrm{GCD}(32,80)\\)។  \n- រក \\(\\mathrm{GCD}(32,80)\\) \n\\[\n\\begin{align*}\n32 &= 2^5 \\\\\n80 &= 2^4 \\times 5\n\\end{align*}\n\\]  \nនោះ \\(\\mathrm{GCD}(32,80) = 2^4 = 16\\)។  \n- ចំនួនខ្សែការពារក្នុងមួយក្រុមគឺ \\(80 \\div 16 = 5\\) នាក់ (និងខ្សែប្រយុទ្ធ ២ នាក់ក្នុងមួយក្រុម)។  \n\nដូច្នេះ ក្នុងមួយក្រុមត្រូវមានខ្សែការពារ ៥ នាក់។"}, {"question": "ចតុកោណកែងពីរមានរង្វាស់ទទឹងស្មើគ្នា។\nរង្វាស់ជ្រុងទាំងបួននៃចតុកោណកែងទាំងពីរជាចំនួនគត់រ៉ឺឡាទីបវិជ្ជមាន។\nចតុកោណកែងទាំងពីរនេះមានផ្ទៃក្រឡា \\(1086\\) និង \\(828\\) រៀងគ្នា។\nរកតម្លៃធំបំផុតនៃរង្វាស់ទទឹងនៃចតុកោណកែងទាំងពីរ។", "answer": "6", "solution": "- ចតុកោណកែងទាំងពីរមានទទឹង \\(w\\) ស្មើគ្នា និងមានបណ្ដោយ \\(l_1\\) និង \\(l_2\\) រៀងគ្នា ដែលជាចំនួនគត់រ៉ឺឡាទីបវិជ្ជមាន \n- ផ្ទៃក្រឡា \\(A_1=w \\times l_1 = 1086\\) និង \\(A_2=w \\times l_2 = 828\\)។  \n- ដើម្បីឱ្យ \\(l_1 = 1086 / w\\) និង \\(l_2 = 828 / w\\) ជាចំនួនគត់ នោះ \\(w\\) ត្រូវតែជាតួចែករួមនៃ \\(1086\\) និង \\(828\\) \n- រក \\(\\mathrm{GCD}(1086, 828)\\)\n\\[\n\\begin{align*}\n1086 &= 2 \\times 3 \\times 181, \\\\\n828 &= 2^2 \\times 3^2 \\times 23.\n\\end{align*}\n\\]  \n\\(\\mathrm{GCD}(1086, 828) = 2 \\times 3 = 6\\) \n- តម្លៃធំបំផុតនៃ \\(w\\) គឺ \\(6\\) (ព្រោះ \\(l_1 = 1086 \\div 6 = 181\\) និង \\(l_2 = 828 \\div 6 = 138\\) ជាចំនួនគត់) \n\nដូច្នេះ តម្លៃធំបំផុតនៃរង្វាស់ទទឹងគឺ \\(6\\)"}, {"question": "រកចំនួនគត់ធម្មជាតិតូចបំផុតដែលចែកដាច់នឹង \\(18\\) ផង នឹង \\(24\\) ផង។", "answer": "72", "solution": "- ចំនួនគត់ធម្មជាតិតូចបំផុតដែលចែកដាច់នឹង \\(18\\) ផង នឹង \\(24\\) ផង គឺជាពហុគុណរួមតូចបំផុតនៃចំនួនទាំងពីរ \n- រក LCM(18, 24):  \n  \\[\n  \\begin{align*}\n  18 &= 2 \\times 3^2, \\\\\n  24 &= 2^3 \\times 3.\n  \\end{align*}\n  \\]  \n\\( \\mathrm{LCM}(18, 24) = 2^3 \\times 3^2 = 8\\times 9=72\\)។  \n\n\nដូច្នេះ ចំនួនគត់ធម្មជាតិតូចបំផុតដែលចែកដាច់នឹង \\(18\\) ផង នឹង \\(24\\) ផងគឺ \\(72\\)"}, {"question": "សុខតែងតែទៅស្ទូចត្រីរៀងរាល់ \\(6\\) ថ្ងៃម្ដង ហើយសៅតែងតែទៅស្ទូចត្រីនៅកន្លែងតែមួយជាមួយសុខរៀងរាល់ \\(7\\) ថ្ងៃម្ដង។\nបើសុខ និងសៅទៅស្ទូចត្រីជាមួយគ្នានៅថ្ងៃនេះ តើប៉ុន្មានថ្ងៃទៀតដែលអ្នកទាំងពីរនឹងទៅស្ទូចត្រីជាមួយគ្នាម្ដងទៀត?", "answer": "42", "solution": "- សុខទៅស្ទូចត្រីរៀងរាល់ \\(6\\) ថ្ងៃម្ដង ហើយសៅទៅស្ទូចត្រីរៀងរាល់ \\(7\\) ថ្ងៃម្ដង\n- ពួកគេទៅជាមួយគ្នានៅថ្ងៃនេះ នោះពេលវេលាបន្ទាប់ដែលពួកគេទៅជាមួយគ្នាម្តងទៀតគឺជាចំនួនថ្ងៃដែលជាពុគុណរួមតូចបំផុតនៃ \\(6\\) និង \\(7\\)\n- រក \\(\\mathrm{LCM}(6,7)\\)   \n  \\[\n  \\begin{align*}\n  6 &= 2 \\times 3 \\\\\n  7 &= 7\n  \\end{align*}\n  \\]  \n  នោះ \\(\\mathrm{LCM}(6,7) = 2\\times 3\\times 7=42\\)  \nដូច្នេះ ពួកគេនឹងទៅស្ទូចត្រីជាមួយគ្នាម្តងទៀតក្នុង \\(42\\) ថ្ងៃក្រោយ"}, {"question": "ម៉ារីដា និងសាវាណាបានទៅហាងលក់ទំនិញមួយដែលទើបតែបើកនៅថ្ងៃដំបូងជាមួយគ្នា។​ \nរាល់ពេលដែលម៉ារីដាទៅហាងលក់ទំនិញនេះម្ដងៗគាត់តែងតែចំណាយ \\(8\\) ដុល្លារ\nហើយសាវាណាតែងតែចំណាយ \\(9\\) ដុល្លារាល់ពេលទៅហាងនេះម្ដងៗ។\nពីរបីសប្ដាហ៍ក្រោយមួយអ្នកទាំងពីរមានការភ្ញាក់ផ្អើលចិត្តជាខ្លាំងព្រោះចំនួនទឹកប្រាក់ដែលអ្នកទាំងពីរបានចំណាយក្នុងហាងនេះគឺស្មើគ្នា។\nតើចំនួនដងតិចបំផុតដែលម៉ារីដាបានទៅហាងនេះស្មើនឹងប៉ុន្មាន?", "answer": "9", "solution": "- ម៉ារីដាចំណាយ \\(8\\) ដុល្លារក្នុងមួយដងទៅហាង ហើយសាវាណាចំណាយ \\(9\\) ដុល្លារក្នុងមួយដង។ ចំនួនទឹកប្រាក់សរុបដែលពួកគាត់ចំណាយស្មើគ្នាបាននៅពេល \\(8a = 9b\\) ដែល \\(a\\) ជាចំនួនដងដែលម៉ារីដាទៅ និង \\(b\\) ជាចំនួនដងដែលសាវាណាទៅ (ជាលេខគត់)។  \n- ដើម្បីរក \\(a\\) តិចបំផុត យើងរក Least Common Multiple (LCM) នៃ \\(8\\) និង \\(9\\)\n- ដោយ \\(8\\) និង \\(9\\) ជាចំនួនបឋមរវាងគ្នា នោះ \\(\\mathrm{LCM}(8,9)=8\\times 9=72\\)  \n- ចំនួនដងតិចបំផុតសម្រាប់ម៉ារីដាគឺ \\(72 \\div 8 = 9\\) ដង (និងសាវាណា \\(72 \\div 9 = 8\\) ដង សរុបទឹកប្រាក់ \\(72\\) ដុល្លារ)\n- ការទៅជាមួយគ្នានៅថ្ងៃដំបូងត្រូវបានរាប់ចូលក្នុងចំនួនដងទាំងនេះ ហើយនេះជាពេលដំបូងដែលទឹកប្រាក់ស្មើគ្នាបន្ទាប់ពីការទៅដំបូង។\nដូច្នេះ ចំនួនដងតិចបំផុតសម្រាប់ម៉ារីដាគឺ \\(9\\) ដង"}, {"question": "សុខ និងសៅបានបោកខោអាវនៅថ្ងៃនេះដូចគ្នា។  \nសុខតែងតែបោកខោអាវរៀងរាល់ \\(6\\) ថ្ងៃម្ដង ហើយសៅវិញតែងតែបោកខោអាវរៀងរាល់ \\(8\\) ថ្ងៃម្ដង។  \nតើឆាប់បំផុតប៉ុន្មានថ្ងៃទៀតដែលអ្នកទាំងពីរបោកខោអាវថ្ងៃតែមួយម្ដងទៀត?", "answer": "24", "solution": "- សុខបោកខោអាវរៀងរាល់ \\(6\\) ថ្ងៃម្ដង ហើយសៅបោកខោអាវរៀងរាល់ \\(8\\) ថ្ងៃម្ដង\n- ពួកគេបោកខោអាវជាមួយគ្នានៅថ្ងៃនេះ នោះពេលវេលាឆាប់បំផុតបន្ទាប់ដែលពួកគេបោកខោអាវថ្ងៃតែមួយម្តងទៀតគឺជាចំនួនថ្ងៃដែលជាពុគុណរួមតូចបំផុត (Least Common Multiple - LCM) របស់ \\(6\\) និង \\(8\\) \n- ដើម្បីរក LCM\\((6,8)\\) យើងបំបែកចំនួនទាំងពីរជាផលគុណកត្តាបឋម  \n  \\[\n  \\begin{align*}\n  6 &= 2 \\times 3 \\\\\n  8 &= 2^3\n  \\end{align*}\n  \\]  \n  នោះ \\(\\mathrm{LCM}(6,8)=2^3 \\times 3 = 8 \\times 3 = 24\\)\nដូច្នេះ ពួកគេនឹងបោកខោអាវថ្ងៃតែមួយម្តងទៀតនៅ \\(24\\) ថ្ងៃក្រោយ"}];
+        
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+        
+        function toKhmerNumber(num) {
+            const khmerDigits = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+            return String(num).split('').map(digit => khmerDigits[parseInt(digit)]).join('');
+        }
+        
+        function init() {
+            document.getElementById('total-questions').textContent = toKhmerNumber(quizData.length);
+            renderQuestion();
+        }
+        
+        function renderQuestion() {
+            const container = document.getElementById('quiz-container');
+            const q = quizData[currentQuestion];
+            
+            container.innerHTML = `
+                <div class="quiz-card active">
+                    <div class="question-number">លំហាត់ទី${toKhmerNumber(currentQuestion + 1)}</div>
+                    <div class="question">${q.question}</div>
+                    <input type="text" class="answer-input" id="answer-input" placeholder="បញ្ចូលចម្លើយរបស់អ្នក..." onkeypress="handleKeyPress(event)">
+                    <div class="btn-group">
+                        <button class="btn btn-check" onclick="checkAnswer()">ពិនិត្យ</button>
+                        <button class="btn btn-next" id="next-btn" onclick="nextQuestion()" disabled>បន្ទាប់</button>
+                    </div>
+                    <div class="feedback" id="feedback"></div>
+                    <div class="solution" id="solution">
+                        <div class="solution-title">ដំណោះស្រាយ:</div>
+                        <div>${q.solution}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('current-question').textContent = toKhmerNumber(currentQuestion + 1);
+            document.getElementById('answer-input').focus();
+            answered = false;
+            
+            // Render MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !answered) {
+                checkAnswer();
+            }
+        }
+        
+        function checkAnswer() {
+            if (answered) return;
+            
+            const userAnswer = document.getElementById('answer-input').value.trim();
+            const correctAnswer = quizData[currentQuestion].answer;
+            const feedback = document.getElementById('feedback');
+            const solution = document.getElementById('solution');
+            
+            answered = true;
+            
+            if (userAnswer === correctAnswer) {
+                score++;
+                feedback.className = 'feedback correct show';
+                feedback.innerHTML = '✅ ត្រឹមត្រូវ! ល្អណាស់!';
+                document.getElementById('score').textContent = toKhmerNumber(score);
+            } else {
+                feedback.className = 'feedback incorrect show';
+                feedback.innerHTML = `❌ មិនត្រឹមត្រូវទេ!</strong>`;
+            }
+            
+            solution.classList.add('show');
+            document.getElementById('next-btn').disabled = false;
+            document.getElementById('answer-input').disabled = true;
+            
+            // Render MathJax for solution
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+        
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion < quizData.length) {
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+        
+        function showResults() {
+            document.getElementById('quiz-container').style.display = 'none';
+            document.querySelector('.score-board').style.display = 'none';
+            
+            const results = document.getElementById('results');
+            const percentage = Math.round((score / quizData.length) * 100);
+            
+            document.getElementById('final-score').textContent = `${toKhmerNumber(score)}/${toKhmerNumber(quizData.length)}`;
+            document.getElementById('percentage').textContent = `${toKhmerNumber(percentage)}%`;
+            
+            results.classList.add('show');
+        }
+        
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answered = false;
+            
+            document.getElementById('score').textContent = toKhmerNumber(0);
+            document.getElementById('quiz-container').style.display = 'block';
+            document.querySelector('.score-board').style.display = 'flex';
+            document.getElementById('results').classList.remove('show');
+            
+            renderQuestion();
+        }
+        
+        // Initialize quiz on page load
+        init();
+    </script>
+</body>
+</html>
